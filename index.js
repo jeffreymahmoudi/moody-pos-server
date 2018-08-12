@@ -8,6 +8,9 @@ const { PORT, CLIENT_ORIGIN } = require('./config');
 const { dbConnect } = require('./db-mongoose');
 // const {dbConnect} = require('./db-knex');
 
+const menuRouter = require('./routes/menu')
+const tablesRouter = require('./routes/tables')
+
 const app = express();
 
 app.use(
@@ -21,6 +24,11 @@ app.use(
     origin: CLIENT_ORIGIN
   })
 );
+
+app.use(express.json())
+
+app.use('/api/menu', menuRouter)
+app.use('/api/tables', tablesRouter)
 
 function runServer(port = PORT) {
   const server = app
