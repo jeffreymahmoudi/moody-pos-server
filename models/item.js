@@ -3,12 +3,12 @@
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
-const itemsSchema = Schema({
+const itemSchema = Schema({
   name: { type: String, required: true, unique: true },
   price: { type: Number, required: true }
 })
 
-itemsSchema.set('toObject', {
+itemSchema.set('toObject', {
   transform: function(doc, ret) {
     ret.id = ret._id;
     delete ret._id;
@@ -16,4 +16,4 @@ itemsSchema.set('toObject', {
   }
 })
 
-module.exports = mongoose.model('Items', itemsSchema)
+module.exports = mongoose.model('Item', itemSchema)

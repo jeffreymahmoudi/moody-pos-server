@@ -3,14 +3,16 @@
 const express = require('express')
 const mongoose = require('mongoose')
 
-const Checks = require('../models/checks')
+const Check = require('../models/check')
 
 const router = express.Router()
 
 router.get('/', (req, res, next) => {
-  Checks.find({})
-  .then(results => res.json(results))
-  .catch(next)
+  Check.find({})
+    .populate('orderedItems')
+    .sort({ 'updatedAt': 'desc' })
+    .then(results => res.json(results))
+    .catch(next)
 })
 
 router.get('/:id', (req, res, next) => {
@@ -22,7 +24,7 @@ router.get('/:id', (req, res, next) => {
     return next(err);
   }
 
-  Checks.findById(id)
+  Check.findById(id)
     .populate('orderedItems')
     .then(result => {
       if (result) {
@@ -40,11 +42,61 @@ router.post('/', (req, res, next) => {
   const { tableId } = req.body
 
   const newCheck = { tableId }
-  Checks.create(newCheck)
+  Check.create(newCheck)
   .then(result => {
     res.location(`${req.originalUrl}/${result.id}`).status(201).json(result);
   })
   .catch(next)
+})
+
+router.put('/:id/addItem', (req, res, next) => {
+  const { id } = req.params
+  const { itemId } = req.body
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    const err = new Error('The `id` is not valid');
+    err.status = 400;
+    return next(err);
+  }
+
+  if (!mongoose.Types.ObjectId.isValid(itemId)) {
+    const err = new Error('The `itemId` is not valid');
+    err.status = 400;
+    return next(err);
+  }
+
+  Check.findByIdAndUpdate( id,
+    {$push: {orderedItems: itemId }})
+    // {safe: true, upsert: true})
+    .populate('orderedItems')
+    .then(result => {
+      if (result) {
+        res.json(result);
+      } else {
+        next();
+      }
+    })
+    .catch(err => {
+      next(err);
+    })
+
+  // Check.findById(id)
+  //   .then(check => {
+  //     check.orderedItems.push(itemId)
+  //     check.save()
+  //     return check
+  //   }) 
+  //   // .populate('items')
+  //   .then(result => {
+  //     if (result) {
+  //       res.json(result);
+  //     } else {
+  //       next();
+  //     }
+  //   })
+  //   .catch(err => {
+  //     next(err);
+  //   })
 })
 
 module.exports = router

@@ -2,12 +2,12 @@
 
 const express = require('express')
 
-const Items = require('../models/items')
+const Items = require('../models/item')
 
 const router = express.Router()
 
 router.get('/', (req, res, next) => {
-  Items.find({})
+  Items.find()
   .then(results => res.json(results))
   .catch(next)
 })

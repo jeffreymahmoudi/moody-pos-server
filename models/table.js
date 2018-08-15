@@ -3,11 +3,11 @@
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
-const tablesSchema = Schema({
-  number: {type: Number, required: true, unique: true }
+const tableSchema = Schema({
+  number: { type: Number, required: true, unique: true }
 })
 
-tablesSchema.set('toObject', {
+tableSchema.set('toObject', {
   transform: function(doc, ret) {
     ret.id = ret._id;
     delete ret._id;
@@ -15,4 +15,4 @@ tablesSchema.set('toObject', {
   }
 })
 
-module.exports = mongoose.model('Tables', tablesSchema)
+module.exports = mongoose.model('Table', tableSchema)
