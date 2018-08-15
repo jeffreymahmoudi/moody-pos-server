@@ -2,12 +2,12 @@
 
 const express = require('express')
 
-const Menu = require('../models/menu')
+const Items = require('../models/items')
 
 const router = express.Router()
 
 router.get('/', (req, res, next) => {
-  Menu.find({})
+  Items.find({})
   .then(results => res.json(results))
   .catch(next)
 })
