@@ -66,8 +66,7 @@ router.put('/:id/addItem', (req, res, next) => {
   }
 
   Check.findByIdAndUpdate( id,
-    {$push: {orderedItems: itemId }})
-    // {safe: true, upsert: true})
+    { $push: {orderedItems: itemId } })
     .populate('orderedItems')
     .then(result => {
       if (result) {
@@ -79,24 +78,30 @@ router.put('/:id/addItem', (req, res, next) => {
     .catch(err => {
       next(err);
     })
+})
 
-  // Check.findById(id)
-  //   .then(check => {
-  //     check.orderedItems.push(itemId)
-  //     check.save()
-  //     return check
-  //   }) 
-  //   // .populate('items')
-  //   .then(result => {
-  //     if (result) {
-  //       res.json(result);
-  //     } else {
-  //       next();
-  //     }
-  //   })
-  //   .catch(err => {
-  //     next(err);
-  //   })
+router.put('/:id/payOrder', (req, res, next) => {
+  const { id } = req.params
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    const err = new Error('The `id` is not valid');
+    err.status = 400;
+    return next(err);
+  }
+
+  Check.findByIdAndUpdate( id,
+    { closed: true} )
+    .populate('orderedItems')
+    .then(result => {
+      if (result) {
+        res.json(result);
+      } else {
+        next();
+      }
+    })
+    .catch(err => {
+      next(err);
+    })
 })
 
 module.exports = router
