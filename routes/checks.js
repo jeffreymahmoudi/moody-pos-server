@@ -7,6 +7,17 @@ const Check = require('../models/check')
 
 const router = express.Router()
 
+router.post('/', (req, res, next) => {
+  const { tableId } = req.body
+
+  const newCheck = { tableId }
+  Check.create(newCheck)
+  .then(result => {
+    res.location(`${req.originalUrl}/${result.id}`).status(201).json(result);
+  })
+  .catch(next)
+})
+
 router.get('/', (req, res, next) => {
   Check.find({})
     .populate('orderedItems')
@@ -38,17 +49,6 @@ router.get('/:id', (req, res, next) => {
     })
 })
 
-router.post('/', (req, res, next) => {
-  const { tableId } = req.body
-
-  const newCheck = { tableId }
-  Check.create(newCheck)
-  .then(result => {
-    res.location(`${req.originalUrl}/${result.id}`).status(201).json(result);
-  })
-  .catch(next)
-})
-
 router.put('/:id/addItem', (req, res, next) => {
   const { id } = req.params
   const { itemId } = req.body
@@ -66,7 +66,9 @@ router.put('/:id/addItem', (req, res, next) => {
   }
 
   Check.findByIdAndUpdate( id,
-    { $push: {orderedItems: itemId } })
+    { $push: {orderedItems: itemId } },
+    { new: true }
+  )
     .populate('orderedItems')
     .then(result => {
       if (result) {
@@ -80,7 +82,40 @@ router.put('/:id/addItem', (req, res, next) => {
     })
 })
 
-router.put('/:id/payOrder', (req, res, next) => {
+// router.put('/:id/voidItem', (req, res, next) => {
+//   const { id } = req.params
+//   const { itemId } = req.body
+
+//   if (!mongoose.Types.ObjectId.isValid(id)) {
+//     const err = new Error('The `id` is not valid');
+//     err.status = 400;
+//     return next(err);
+//   }
+
+//   if (!mongoose.Types.ObjectId.isValid(itemId)) {
+//     const err = new Error('The `itemId` is not valid');
+//     err.status = 400;
+//     return next(err);
+//   }
+
+//   Check.findByIdAndUpdate( id,
+//     { $pull: {orderedItems: itemId } },
+//     { new: true }
+//     )
+//     .populate('orderedItems')
+//     .then(result => {
+//       if (result) {
+//         res.json(result);
+//       } else {
+//         next();
+//       }
+//     })
+//     .catch(err => {
+//       next(err);
+//     })
+// })
+
+router.put('/:id/close', (req, res, next) => {
   const { id } = req.params
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -90,7 +125,7 @@ router.put('/:id/payOrder', (req, res, next) => {
   }
 
   Check.findByIdAndUpdate( id,
-    { closed: true} )
+    { closed: true}, { new: true } )
     .populate('orderedItems')
     .then(result => {
       if (result) {
